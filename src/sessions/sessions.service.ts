@@ -4,10 +4,30 @@ import * as uuid from 'uuid/v1';
 
 @Injectable()
 export class SessionsService {
-    sessions : Session[] = [];
+    private sessions : Session[] = [];
 
     getAllSessions () : Session[] {
         return this.sessions;
+    }
+
+    getSessionById (id : string) : Session {
+        return this.sessions.find (session => session.id === id);
+    }
+
+    deleteSession (id : string) {
+        this.sessions = this.sessions.filter (session => session.id !== id);
+    }
+
+    addPerson (id : string) : boolean {
+        let index : number = this.sessions.findIndex (session => session.id === id);
+        
+        if (this.sessions[index].maxPeople != -1) {
+            if (this.sessions[index].maxPeople == this.sessions[index].numPeople) return false;
+        }
+
+        this.sessions[index].numPeople++;
+
+        return true;
     }
 
     createSession (title:string, tagline:string, location:Locations, time:any, room:string, subject:string, maxPeople:number) : Session {
@@ -26,6 +46,26 @@ export class SessionsService {
         this.sessions.push(sesh);
 
         return sesh;
+    }
+
+    updateSession (id:string, title:string, tagline:string, location:Locations,
+                   time:any, room:string, subject:string, maxPeople:number) : Session {
+        let index : number = this.sessions.findIndex(session => session.id === id); 
+        this.sessions[index] = {
+            id: id,
+            title,
+            time,
+            tagline,
+            room,
+            subject,
+            location,
+            numPeople: this.sessions[index].numPeople,
+            maxPeople,
+        };
+
+        console.log (room);
+
+        return this.sessions[index];
     }
 }
 
