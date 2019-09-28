@@ -1,0 +1,22 @@
+Info {
+    Location:
+    Time:
+    Subject:
+    NumPeople:
+    MaxPeople:
+}
+
+
+
+Run:
+    npm run start:dev
+
+Create Module:
+    nest g module [name]
+
+Create Controller:
+    nest g controller [module name] --no-spec
+
+Create Service:
+    nest g service [module name] --no-spec
+
