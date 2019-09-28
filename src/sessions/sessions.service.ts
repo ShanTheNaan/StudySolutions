@@ -1,17 +1,36 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Session, Locations } from './sessions.model';
 import * as uuid from 'uuid/v1';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { promises } from 'dns';
 
 @Injectable()
 export class SessionsService {
     private sessions : Session[] = [];
 
-    getAllSessions () : Session[] {
-        return this.sessions;
+    constructor(@InjectModel('Session') private readonly sessionModel: Model<Session>, ) {
+
     }
 
-    getSessionById (id : string) : Session {
-        return this.sessions.find (session => session.id === id);
+    async getAllSessions () : Promise<Session []>{
+        const sessions = await this.sessionModel.find().exec();
+        return sessions as Session[];
+    }
+
+    async getSessionById (id : string) {
+        const session = await this.findSession(id);
+        return {
+            id: session.id,
+            title: session.title,
+            tagline: session.tagline,
+            location: session.location,
+            room: session.room,
+            time: session.time,
+            subject: session.subject,
+            numPeople: session.numPeople,
+            maxPeople: session.maxPeople,
+        };
     }
 
     deleteSession (id : string) {
@@ -30,43 +49,67 @@ export class SessionsService {
         return true;
     }
 
-    createSession (title:string, tagline:string, location:Locations, time:any, room:string, subject:string, maxPeople:number) : Session {
-        const sesh : Session = {
-            id: uuid(),
-            title,
-            time,
+    async createSession (title:string, tagline:string, location:Locations, time:Date, room:string, subject:string, maxPeople:number, numPeople:number){
+        const newSession = new this.sessionModel({
+            title : title,
+            time : time,
             tagline,
-            room,
-            subject,
-            location,
-            numPeople: 0,
-            maxPeople,
-        };
-
-        this.sessions.push(sesh);
-
-        return sesh;
+            room : room,
+            subject : subject,
+            location : location,
+            numPeople : numPeople,
+            maxPeople : maxPeople,
+        });
+        const result = await newSession.save();
+        console.log(result);
     }
 
-    updateSession (id:string, title:string, tagline:string, location:Locations,
-                   time:any, room:string, subject:string, maxPeople:number) : Session {
-        let index : number = this.sessions.findIndex(session => session.id === id); 
-        this.sessions[index] = {
-            id: id,
-            title,
-            time,
-            tagline,
-            room,
-            subject,
-            location,
-            numPeople: this.sessions[index].numPeople,
-            maxPeople,
-        };
+    async updateSession (id:string, title:string, tagline:string, location:Locations,
+                   time:Date, room:string, subject:string, maxPeople:number, numPeople:number) {
+        const session = await this.findSession(id);
+        if(title){
+            session.title = title;
+        }
+        if(tagline){
+            session.tagline = tagline;
+        }
+        if(location){
+            session.location = location;
+        }
+        if(time){
+            session.time = time;
+        }
+        if(room){
+            session.room = room;
+        }
+        if(subject){
+            session.subject = subject;
+        }
+        if(numPeople){
+            session.numPeople = numPeople;
+        }
+        if(maxPeople){
+            session.maxPeople = maxPeople;
+        }
 
-        console.log (room);
-
-        return this.sessions[index];
+        session.save();
+        return session;
     }
+
+    private async findSession(id : string) : Promise<Session>{
+        let session;
+        try{
+            const session = await this.sessionModel.findById(id);
+        } catch(error){
+            throw new NotFoundException('Session not found');
+        }
+        
+        if(!session){
+            throw new NotFoundException('Session not found');
+        }
+
+        return session;
+    } 
 }
 
     // id: string;

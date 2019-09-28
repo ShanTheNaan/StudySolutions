@@ -7,25 +7,38 @@ export class SessionsController {
     constructor (private ss : SessionsService) {}
        
     @Get ()
-    getAllSessions() : Session[] {
-        return this.ss.getAllSessions();
+    async getAllSessions() {
+        const sessions = await this.ss.getAllSessions();
+        return sessions.map((sess) => ({
+            id: sess.id,
+            title: sess.title,
+            tagline: sess.tagline,
+            location: sess.location,
+            room: sess.room,
+            time: sess.time,
+            subject: sess.subject,
+            numPeople: sess.numPeople,
+            maxPeople: sess.maxPeople,
+        }));
     }
 
     @Get ('/:id')
-    getSession(@Param ('id') id : string ) : Session {
-        return this.ss.getSessionById(id);
+    async getSession(@Param ('id') id : string ){
+        const sess = await this.ss.getSessionById(id);
+        return sess;
     }
 
     @Post ()
-    createSession(
+    async createSession(
         @Body ('title') title : string,
         @Body ('tagline') tagline: string,
         @Body ('location') location : string,
-        @Body ('time') time,
+        @Body ('time') time : string,
         @Body ('room') room : string,
         @Body ('subject') subject : string,
         @Body ('maxPeople') maxPeople : number,
-    ) : Session {
+        @Body ('numPeople') numPeople : number,
+    ) {
 
         let loc : Locations;
         if (location == "Min Kao") {
@@ -33,8 +46,9 @@ export class SessionsController {
         } else {
             loc = Locations.LIB;
         }
-
-        return this.ss.createSession (title, tagline, loc, time, room, subject, maxPeople);
+        let t = new Date(time);
+        const session = await this.ss.createSession (title, tagline, loc, t, room, subject, maxPeople, numPeople);
+        return session;
     }
 
     @Put ('/:id')
@@ -44,16 +58,17 @@ export class SessionsController {
     }
 
     @Patch ('/:id')
-    updateSession (
+    async updateSession (
         @Param ('id') id : string,
         @Body ('title') title : string,
         @Body ('tagline') tagline: string,
         @Body ('location') location : string,
-        @Body ('time') time,
+        @Body ('time') time : Date,
         @Body ('room') room : string,
         @Body ('subject') subject : string,
         @Body ('maxPeople') maxPeople : number,
-    ) : Session {
+        @Body ('numPeople') numPeople : number,
+    ){
         let loc : Locations;
         if (location == "Min Kao") {
             loc = Locations.MK;
@@ -61,7 +76,8 @@ export class SessionsController {
             loc = Locations.LIB;
         }
 
-        return this.ss.updateSession (id, title, tagline, loc, time, room, subject, maxPeople);
+        const session = await this.ss.updateSession (id, title, tagline, loc, time, room, subject, maxPeople, numPeople);
+        return session;
     }
 
     @Delete ('/:id')
