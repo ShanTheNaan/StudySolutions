@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Put } from '@nestjs/common';
 import { SessionsService } from './sessions.service';
 import { Session, Locations } from './sessions.model';
+import { NormalModuleReplacementPlugin } from 'webpack';
 
 @Controller('sessions')
 export class SessionsController {
@@ -51,10 +52,10 @@ export class SessionsController {
         return session;
     }
 
-    @Put ('/:id')
-    addPerson (@Param ('id') id:string) {
-        this.ss.addPerson(id);
-        return "Added!";
+    @Put ('/:id/:numPeople')
+    async addPerson (@Param ('id') id:string, @Param('numPeople') numPeople:number) {
+        const ppl = await this.ss.addPerson(id, numPeople);
+        return ppl;
     }
 
     @Patch ('/:id')
@@ -76,14 +77,14 @@ export class SessionsController {
             loc = Locations.LIB;
         }
 
-        const session = await this.ss.updateSession (id, title, tagline, loc, time, room, subject, maxPeople, numPeople);
+        const session = await this.ss.updateSession(id, title, tagline, loc, time, room, subject, maxPeople, numPeople);
         return session;
     }
 
     @Delete ('/:id')
-    deleteSession (@Param ('id') id : string) {
-        let status = this.ss.deleteSession (id);
-        return "Deleted!";
+    async deleteSession (@Param ('id') id : string) {
+        await this.ss.deleteSession(id);
+        return null;
     }
 
 }

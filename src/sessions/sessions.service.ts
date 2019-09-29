@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, NotAcceptableException } from '@nestjs/common';
 import { Session, Locations } from './sessions.model';
 import * as uuid from 'uuid/v1';
 import { InjectModel } from '@nestjs/mongoose';
@@ -33,20 +33,24 @@ export class SessionsService {
         };
     }
 
-    deleteSession (id : string) {
-        this.sessions = this.sessions.filter (session => session.id !== id);
+    async deleteSession (Id : string) {
+        const result = await this.sessionModel.deleteOne({_id: Id}).exec();
+        if(result.n == 0){
+            throw new NotFoundException('Could not find session.');
+        }
     }
 
-    addPerson (id : string) : boolean {
-        let index : number = this.sessions.findIndex (session => session.id === id);
-        
-        if (this.sessions[index].maxPeople != -1) {
-            if (this.sessions[index].maxPeople == this.sessions[index].numPeople) return false;
+    async addPerson (id : string, numPeople : number) {
+        const session = await this.findSession(id);
+        const oldNum = session.numPeople;
+        if(!session.maxPeople || (session.numPeople + numPeople) <= session.maxPeople){
+            session.numPeople += +numPeople;
+            session.save();
         }
-
-        this.sessions[index].numPeople++;
-
-        return true;
+        if(oldNum == session.numPeople){
+            throw new NotAcceptableException('Number exceeds maxinum capacity.');
+        }
+        return session.numPeople;
     }
 
     async createSession (title:string, tagline:string, location:Locations, time:Date, room:string, subject:string, maxPeople:number, numPeople:number){
@@ -99,7 +103,7 @@ export class SessionsService {
     private async findSession(id : string) : Promise<Session>{
         let session;
         try{
-            const session = await this.sessionModel.findById(id);
+            session = await this.sessionModel.findById(id);
         } catch(error){
             throw new NotFoundException('Session not found');
         }

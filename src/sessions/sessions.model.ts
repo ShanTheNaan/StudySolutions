@@ -17,8 +17,8 @@ export const SessionSchema = new mongoose.Schema({
     room: { type: String, required: true},
     time: { type: Date, required: true},
     subject: { type: String, required: true},
-    numPeople: { type: String, required: true},
-    maxPeople: { type: String, required: false},
+    numPeople: { type: Number, required: true},
+    maxPeople: { type: Number, required: false},
 });
 
 export interface Session extends mongoose.Document{
