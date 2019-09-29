@@ -3,7 +3,7 @@ import * as mongoose from 'mongoose';
 
 export enum Locations {
     MK = 'Min Kao',
-    LIB = 'Library',
+    LIB = 'Hodges Library',
     STO = 'Stokely',
     HAS = 'Haslam',
     SU = "Studen Union"
@@ -15,7 +15,7 @@ export const SessionSchema = new mongoose.Schema({
     //location string
     location: { type: String, required: true},
     room: { type: String, required: true},
-    time: { type: Date, required: true},
+    time: { type: String, required: true},
     subject: { type: String, required: true},
     numPeople: { type: Number, required: true},
     maxPeople: { type: Number, required: false},
@@ -27,7 +27,7 @@ export interface Session extends mongoose.Document{
     tagline: string;
     location: Locations;
     room: string;
-    time: Date;
+    time: string;
     subject: string;
     numPeople: number;
     maxPeople: number;

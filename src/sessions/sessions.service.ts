@@ -4,6 +4,7 @@ import * as uuid from 'uuid/v1';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { promises } from 'dns';
+import { timer } from 'rxjs';
 
 @Injectable()
 export class SessionsService {
@@ -53,7 +54,7 @@ export class SessionsService {
         return session.numPeople;
     }
 
-    async createSession (title:string, tagline:string, location:Locations, time:Date, room:string, subject:string, maxPeople:number, numPeople:number){
+    async createSession (title:string, tagline:string, location:Locations, time:string, room:string, subject:string, maxPeople:number, numPeople:number){
         const newSession = new this.sessionModel({
             title : title,
             time : time,
@@ -69,7 +70,7 @@ export class SessionsService {
     }
 
     async updateSession (id:string, title:string, tagline:string, location:Locations,
-                   time:Date, room:string, subject:string, maxPeople:number, numPeople:number) {
+                   time:string, room:string, subject:string, maxPeople:number, numPeople:number) {
         const session = await this.findSession(id);
         if(title){
             session.title = title;

@@ -1,7 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Put } from '@nestjs/common';
 import { SessionsService } from './sessions.service';
 import { Session, Locations } from './sessions.model';
-import { NormalModuleReplacementPlugin } from 'webpack';
 
 @Controller('sessions')
 export class SessionsController {
@@ -42,13 +41,20 @@ export class SessionsController {
     ) {
 
         let loc : Locations;
-        if (location == "Min Kao") {
+        if (location == 'Min Kao') {
             loc = Locations.MK;
+        } else if (location == 'Hodges Library') {
+            loc = Locations.LIB;
+        } else if (location == 'Stokely'){
+            loc = Locations.STO;
+        } else if (location == 'Haslam'){
+            loc = Locations.HAS;
+        } else if (location == 'Studen Union'){
+            loc = Locations.SU;
         } else {
             loc = Locations.LIB;
         }
-        let t = new Date(time);
-        const session = await this.ss.createSession (title, tagline, loc, t, room, subject, maxPeople, numPeople);
+        const session = await this.ss.createSession (title, tagline, loc, time, room, subject, maxPeople, numPeople);
         return session;
     }
 
@@ -64,15 +70,23 @@ export class SessionsController {
         @Body ('title') title : string,
         @Body ('tagline') tagline: string,
         @Body ('location') location : string,
-        @Body ('time') time : Date,
+        @Body ('time') time : string,
         @Body ('room') room : string,
         @Body ('subject') subject : string,
         @Body ('maxPeople') maxPeople : number,
         @Body ('numPeople') numPeople : number,
     ){
         let loc : Locations;
-        if (location == "Min Kao") {
+        if (location == 'Min Kao') {
             loc = Locations.MK;
+        } else if (location == 'Hodges Library') {
+            loc = Locations.LIB;
+        } else if (location == 'Stokely'){
+            loc = Locations.STO;
+        } else if (location == 'Haslam'){
+            loc = Locations.HAS;
+        } else if (location == 'Studen Union'){
+            loc = Locations.SU;
         } else {
             loc = Locations.LIB;
         }
